@@ -1,6 +1,11 @@
+import os
+import sys
+import argparse
+
 import networkx as nx
 import numpy as np
 import scipy.sparse
+import itertools
 
 
 def gen_graph(vertex_num, edge_prob):
@@ -24,6 +29,16 @@ def gen_graph(vertex_num, edge_prob):
   graph_sparse_m = nx.to_scipy_sparse_matrix(graph)
   return graph_sparse_m
 
+
+def loadgraph(fn):
+  """
+  Load a numpy-saved graph from disk
+
+  @param fn: the file path and name of the saved graph
+  @return: the loaded sparse csc scipy matrix
+  """
+  assert os.path.exists(fn), "The specified file path: %s does not exist" % str(fn)
+  return np.load(fn).item()
 
 def output_giraph_json(filename, m):
   '''
@@ -70,15 +85,14 @@ def output_giraph_intIntNullText(filename, m):
     Graph adjacency matrix
   '''
   coo_m = scipy.sparse.coo_matrix(m)
-  with open(filename, 'w') as file:
+  with open(filename, 'w') as outf:
     prev_i = -1
-    for i,j,v in zip(coo_m.row, coo_m.col, coo_m.data):
+    for i,j,v in itertools.izip(coo_m.col, coo_m.row, coo_m.data):
       if i != prev_i:
         if prev_i != -1:
-          file.write("\n")
-        file.write("%d %d" % (i,j))
+          outf.write("\n")
+        outf.write("%d %d" % (i,j))
         prev_i = i
       else:
-        file.write(" %d" % j)
-
+        outf.write(" %d" % j)
 
