@@ -55,5 +55,30 @@ def output_giraph_json(filename, m):
         file.write(",[%d,1]" % j)
 
 
+def output_giraph_intIntNullText(filename, m):
+  '''
+  out put sparse matrix into
+  giraph  IntIntNullTextInputFormat
+
+  Each line consists of: vertex neighbor1 neighbor2 ...
+
+  Parameters
+  ----------
+  filename : string
+    output file name
+  m : SciPy sparse matrix
+    Graph adjacency matrix
+  '''
+  coo_m = scipy.sparse.coo_matrix(m)
+  with open(filename, 'w') as file:
+    prev_i = -1
+    for i,j,v in zip(coo_m.row, coo_m.col, coo_m.data):
+      if i != prev_i:
+        if prev_i != -1:
+          file.write("\n")
+        file.write("%d %d" % (i,j))
+        prev_i = i
+      else:
+        file.write(" %d" % j)
 
 
